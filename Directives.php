@@ -13,7 +13,7 @@ class Directives
 	 * @var $DS
 	 */
 	private $DS = DIRECTORY_SEPARATOR;
-	
+
 	/**
 	 * Cached view
 	 *

@@ -127,7 +127,7 @@ class Template
      */
     public function register(string $class)
     {
-        if (!class_exists($class)) 
+        if (!class_exists($class))
             return $this->exception(
                 'Class "' . $class . '" does not exist.'
             );
