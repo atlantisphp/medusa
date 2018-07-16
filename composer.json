@@ -1,0 +1,22 @@
+{
+  "name": "atlantisphp/medusa",
+  "description": "Easy to use PHP templating engine",
+  "version": "1.0",
+  "license": "MIT",
+  "type": "package",
+  "authors": [
+      {
+        "name": "Donald Pakkies",
+        "email": "donaldpakkies@gmail.com"
+      }
+  ],
+  "require": {
+    "symfony/var-dumper": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "AtlantisPHP\\Medusa\\": ""
+    }
+  },
+  "minimum-stability":"stable"
+}
