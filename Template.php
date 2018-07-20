@@ -3,6 +3,7 @@
 namespace AtlantisPHP\Medusa;
 
 use Exception;
+use AtlantisPHP\Medusa\AppDirectives\{EndEmpty, EndIsset, EndNot, EndNull, Not};
 
 class Template
 {
@@ -40,6 +41,22 @@ class Template
      * @var $directives
      */
     private $directives = [];
+
+    /**
+     * Register custom directives
+     *
+     * @return boolean
+     */
+    public function __construct()
+    {
+        $this->register(EndEmpty::class);
+        $this->register(EndIsset::class);
+        $this->register(EndNot::class);
+        $this->register(EndNull::class);
+        $this->register(Not::class);
+
+        return true;
+    }
 
     /**
 	 * Throw new Exception
