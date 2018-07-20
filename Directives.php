@@ -109,11 +109,14 @@ class Directives
 			$view = str_replace("'", "", $match[1]);
 			$view = str_replace('"', '', $view);
 
-			if (file_exists($dir . $this->DS . $view . $ext)) {
-				return '<!--%' .base64_encode($view). '%-->' . PHP_EOL . file_get_contents($dir . '/' . $view . $ext);
+			$path = $this->cleanPath($dir . $this->DS .$view . $ext);
+			$view = $this->cleanPath($view);
+
+			if (file_exists($path)) {
+				return '<!--%' .base64_encode($view). '%-->' . PHP_EOL . file_get_contents($path);
 			}
 			else {
-				$this->exception('"' . $dir . $this->DS . $view . $ext . '" does not exist.');
+				$this->exception('"' . $path . '" does not exist.');
 			}
 		}, $this->__cached);
 	}
@@ -314,5 +317,14 @@ class Directives
 		}
 
 		return "<?php echo (new $subject)->message() ;?>";
+	}
+
+	private function cleanPath($path)
+	{
+		$path = str_replace('/', $this->DS, $path);
+		$path = str_replace('\\', $this->DS, $path);
+		$path = preg_replace('#' . $this->DS . '+#', $this->DS, $path);
+
+		return $path;
 	}
 }
