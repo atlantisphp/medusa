@@ -143,23 +143,27 @@ class Directives
 
 			if (!isset($pattern)) return;
 
+			if (!isset($class->directive) && $class->extends == true && count($reflection->getParameters()) == 0) {
+				$pattern = "/\{\% $name \%\}/";
+			}
+
 			if (count($reflection->getParameters()) > 0) {
 
-				$this->__cached = preg_replace_callback($pattern, function($match) use($subject, $object) {
-					return $object->persist($match, $subject);
+				$this->__cached = preg_replace_callback($pattern, function($match) use($subject, $object, $class) {
+					return $object->persist($match, $subject, $class);
 				}, $this->__cached);
 
 				return;
 			}
 
-			$this->__cached = preg_replace_callback($pattern, function($match) use($subject, $object) {
-				return $object->persist(null, $subject);
+			$this->__cached = preg_replace_callback($pattern, function($match) use($subject, $object, $class) {
+				return $object->persist(null, $subject, $object, $class, true);
 			}, $this->__cached);
 		}
 	}
 
 	/**
-	 * If statment
+	 * If statement
 	 *
 	 * @return string $this->__cached
 	 */
@@ -289,10 +293,24 @@ class Directives
 	 * @param  object $subject
 	 * @return string
 	 */
-	private function persist($match, $subject)
+	private function persist($match, $subject, $directive, $isstring = false)
 	{
+		if ($isstring) {
+			return (new $subject)->message();
+		}
+
+		$uses = isset($directive->uses) ? $directive->uses . ' ' : '';
+
 		if ($match != null) {
+			if (isset($directive->extends) && $directive->extends == true) {
+				return $uses . "(new $subject)->message($match[1])";
+			}
+
 			return "<?php echo (new $subject)->message($match[1]) ;?>";
+		}
+
+		if (isset($directive->extends) && $directive->extends == true) {
+			return $uses . "(new $subject)->message()";
 		}
 
 		return "<?php echo (new $subject)->message() ;?>";
