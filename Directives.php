@@ -197,7 +197,7 @@ class Directives
 	private function mfor()
 	{
 		$this->__cached = preg_replace('/\{\% for (.*?) \%\}/', '<?php for ($1) : ?>', $this->__cached);
-   		$this->__cached = preg_replace('/\{\% endfor \%\}/', '<?php endfor ;?>', $this->__cached);
+		$this->__cached = preg_replace('/\{\% endfor \%\}/', '<?php endfor ;?>', $this->__cached);
 	}
 
 	/**
@@ -208,7 +208,7 @@ class Directives
 	private function mswitch()
 	{
 		$this->__cached = preg_replace('/\{\% switch (.*?) \%\}/', '<?php switch ($1) : ?>', $this->__cached);
-    	$this->__cached = preg_replace('/\{\% endswitch \%\}/', '<?php endswitch ;?>', $this->__cached);
+		$this->__cached = preg_replace('/\{\% endswitch \%\}/', '<?php endswitch ;?>', $this->__cached);
 	}
 
 	/**
@@ -219,7 +219,7 @@ class Directives
 	private function mwhile()
 	{
 		$this->__cached = preg_replace('/\{\% while (.*?) \%\}/', '<?php while ($1) : ?>', $this->__cached);
-    	$this->__cached = preg_replace('/\{\% endwhile \%\}/', '<?php endwhile ;?>', $this->__cached);
+		$this->__cached = preg_replace('/\{\% endwhile \%\}/', '<?php endwhile ;?>', $this->__cached);
 	}
 
 	/**
@@ -283,7 +283,7 @@ class Directives
 	 */
 	private function mcomment()
 	{
-    	$this->__cached = preg_replace('/\{\{\-\-(.*?)\-\-\}\}/s', '<?php /*$1*/ ?>', $this->__cached);
+		$this->__cached = preg_replace('/\{\{\-\-(.*?)\-\-\}\}/s', '<?php /*$1*/ ?>', $this->__cached);
 	}
 
 	/**
