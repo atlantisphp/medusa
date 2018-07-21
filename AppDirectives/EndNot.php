@@ -2,22 +2,23 @@
 
 namespace AtlantisPHP\Medusa\AppDirectives;
 
-class EndNot
+use AtlantisPHP\Medusa\Directive;
+
+class EndNot extends Directive
 {
 	/**
-	 * Override directive
+	 * Directive extends
 	 *
-	 * @var $directive
+	 * @var $extends
 	 */
-
-  public $extends = true;
+  protected $extends = true;
 
 	/**
 	 * Directive name
 	 *
 	 * @var $name
 	 */
-	public $name = 'endnot';
+	protected $name = 'endnot';
 
 	/**
 	 * Handle directive

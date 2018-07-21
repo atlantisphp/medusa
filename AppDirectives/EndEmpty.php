@@ -2,22 +2,23 @@
 
 namespace AtlantisPHP\Medusa\AppDirectives;
 
-class EndEmpty
+use AtlantisPHP\Medusa\Directive;
+
+class EndEmpty extends Directive
 {
 	/**
-	 * Override directive
+	 * Directive extends
 	 *
-	 * @var $directive
+	 * @var $extends
 	 */
-
-  public $extends = true;
+  protected $extends = true;
 
 	/**
 	 * Directive name
 	 *
 	 * @var $name
 	 */
-	public $name = 'endempty';
+	protected $name = 'endempty';
 
 	/**
 	 * Handle directive

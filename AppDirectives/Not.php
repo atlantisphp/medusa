@@ -2,35 +2,37 @@
 
 namespace AtlantisPHP\Medusa\AppDirectives;
 
-class Not
+use AtlantisPHP\Medusa\Directive;
+
+class Not extends Directive
 {
 	/**
 	 * Override directive
 	 *
 	 * @var $directive
 	 */
-	public $directive = '/not\((.*?)\)/';
+	protected $directive = '/not\((.*?)\)/';
 
 	/**
 	 * Directive extends
 	 *
 	 * @var $extends
 	 */
-	public $extends = true;
+	protected $extends = true;
 
 	/**
 	 * Directive uses
 	 *
 	 * @var $uses
 	 */
-	public $uses = 'if';
+	protected $uses = 'if';
 
 	/**
 	 * Directive name
 	 *
 	 * @var $name
 	 */
-	public $name = 'not';
+	protected $name = 'not';
 
 	/**
 	 * Handle directive
