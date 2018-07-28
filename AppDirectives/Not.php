@@ -7,13 +7,6 @@ use AtlantisPHP\Medusa\Directive;
 class Not extends Directive
 {
 	/**
-	 * Directive extends
-	 *
-	 * @var $extends
-	 */
-	protected $extends = true;
-
-	/**
 	 * Directive uses
 	 *
 	 * @var $uses

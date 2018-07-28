@@ -19,20 +19,6 @@ class Directive
   }
 
   /**
-   * Directive extends
-   *
-   * @return
-   */
-  public function extends()
-  {
-    if (isset($this->extends)) {
-      return $this->extends;
-    }
-
-    return false;
-  }
-
-  /**
    * Directive uses
    *
    * @return

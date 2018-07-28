@@ -372,10 +372,10 @@ class Directives
 
 		$e = $this->__engine;
 
-		if ($directive->extends() === true && $directive->name() !== false && $this->_control($uses)) {
+		if ($uses !== null && $directive->name() !== false && $this->_control($uses)) {
 			return "<?php $uses ((new $subject)->message($match)) : ?>";
 		}
-		else if ($directive->extends() === true && $directive->name() !== false && $this->_control($uses) === false) {
+		else if ($uses !== null && $directive->name() !== false && $this->_control($uses) === false) {
 			return "<?php $uses((new $subject)->message($match)); ?>";
 		}
 		else if ($directive->name() !== true && $uses === null) {
