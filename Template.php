@@ -36,24 +36,42 @@ class Template
     private $viewsExtension = '.medusa.php';
 
     /**
+     * Default templating engine
+     *
+     * @var $engine
+     */
+    private $engine = 'modulus';
+
+    /**
      * Custom directives
      *
      * @var $directives
      */
     private $directives = [];
 
+    public function __construct($engine = 'modulus')
+    {
+        if (in_array($engine, ['modulus', 'blade'])) {
+            $this->engine = $engine;
+            return true;
+        }
+
+        $this->exception('Engine "' . $engine . '" does not exist.');
+        return false;
+    }
+
     /**
      * Register custom directives
      *
      * @return boolean
      */
-    public function __construct()
+    private function registerDirectives()
     {
+        $this->register(Not::class);
         $this->register(EndEmpty::class);
         $this->register(EndIsset::class);
         $this->register(EndNot::class);
         $this->register(EndNull::class);
-        $this->register(Not::class);
 
         return true;
     }
@@ -162,10 +180,11 @@ class Template
 	 */
     public function view(string $view, array $data = [])
     {
-        $path = $this->viewsDirectory . $this->DS . $view . $this->viewsExtension;
+        $path = $this->viewsDirectory . $this->DS . $this->cleanPath($view) . $this->viewsExtension;
         $this->verify($path);
+        $this->registerDirectives();
 
-        $compiler = new Compiler($this->cacheDirectory, $this->viewsDirectory, $this->viewsExtension, $this->directives);
+        $compiler = new Compiler($this->cacheDirectory, $this->viewsDirectory, $this->viewsExtension, $this->directives, $this->engine);
         $compiler->makeView($path, $data);
     }
 
@@ -178,10 +197,11 @@ class Template
 	 */
     public function make(string $view, array $data = [])
     {
-        $path = $this->viewsDirectory . $this->DS . $view . $this->viewsExtension;
+        $path = $this->viewsDirectory . $this->DS . $this->cleanPath($view) . $this->viewsExtension;
         $this->verify($path);
+        $this->registerDirectives();
 
-        $compiler = new Compiler($this->cacheDirectory, $this->viewsDirectory, $this->viewsExtension, $this->directives);
+        $compiler = new Compiler($this->cacheDirectory, $this->viewsDirectory, $this->viewsExtension, $this->directives, $this->engine);
         return $compiler->make($path, $data);
     }
 

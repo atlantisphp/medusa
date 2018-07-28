@@ -35,6 +35,13 @@ class Compiler
 	private $viewsExtension = '.medusa.php';
 
 	/**
+	 * Default templating engine
+	 *
+	 * @var $engine
+	 */
+	private $engine = 'modulus';
+
+	/**
 	 * Custom directives
 	 *
 	 * @var $directives
@@ -49,12 +56,13 @@ class Compiler
 	 * @param string $extension
 	 * @param array  $directives
 	 */
-	public function __construct($cache, $views, $extension = '.medusa.php', $directives)
+	public function __construct($cache, $views, $extension = '.medusa.php', $directives, $engine = 'modulus')
 	{
 		$this->cacheDirectory = $cache;
 		$this->viewsDirectory = $views;
 		$this->viewsExtension = $extension;
 		$this->directives = $directives;
+		$this->engine = $engine;
 	}
 
 	/**
@@ -107,7 +115,7 @@ class Compiler
 	 */
 	private function response($cached)
 	{
-		$directives = new Directives($cached, $this->viewsDirectory, $this->viewsExtension, $this->directives);
+		$directives = new Directives($cached, $this->viewsDirectory, $this->viewsExtension, $this->directives, $this->engine);
 		return $directives->handle();
 	}
 

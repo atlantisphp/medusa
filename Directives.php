@@ -36,6 +36,13 @@ class Directives
 	private $__extension;
 
 	/**
+	 * Default templating engine
+	 *
+	 * @var $__engine
+	 */
+	private $__engine = 'modulus';
+
+	/**
 	 * Custom directives
 	 *
 	 * @var $__directives
@@ -67,12 +74,13 @@ class Directives
 	 * @param string $extension
 	 * @param array  $directives
 	 */
-	public function __construct($cached, $directory, $extension, $directives)
+	public function __construct($cached, $directory, $extension, $directives, $engine)
 	{
 		$this->__cached = $cached;
 		$this->__directory = $directory;
 		$this->__extension = $extension;
 		$this->__directives = $directives;
+		$this->__engine = $engine;
 	}
 
 	/**
@@ -82,8 +90,8 @@ class Directives
 	 */
 	public function handle()
 	{
-		$this->mextend($this->__directory, $this->__extension);
 		$this->mcustom($this->__directives);
+		$this->mextend($this->__directory, $this->__extension);
 		$this->mif();
 		$this->mforeach();
 		$this->mfor();
@@ -105,7 +113,7 @@ class Directives
 	 */
 	private function mextend($dir, $ext)
 	{
-		$this->__cached = preg_replace_callback('/\{\% extend\((.*?)\) \%\}/', function($match)  use ($dir, $ext) {
+		$this->__cached = preg_replace_callback($this->usingDirective('extends\((.*?)\)'), function($match)  use ($dir, $ext) {
 			$view = str_replace("'", "", $match[1]);
 			$view = str_replace('"', '', $view);
 
@@ -119,6 +127,8 @@ class Directives
 				$this->exception('"' . $path . '" does not exist.');
 			}
 		}, $this->__cached);
+
+		$this->mcustom($this->__directives);
 	}
 
 	/**
@@ -129,39 +139,50 @@ class Directives
 	 */
 	private function mcustom($directives)
 	{
+		$e = $this->__engine;
+
 		foreach($directives as $directive) {
 			$class = new $directive['class'];
 			$reflection = new ReflectionMethod($class, 'message');
 			$subject = $directive['class'];
 			$object = $this;
 
-			if (isset($class->name)) {
-				$name = $class->name;
-				$pattern = "/\{\% $name\((.*?)\) \%\}/";
+			if ($class->name() !== false) {
+				$name = $class->name();
+
+				if ($e == 'blade') {
+					$pattern = "/\@$name\((.*?)\)/";
+				}
+				else {
+					$pattern = "/\{\% $name\((.*?)\) \%\}/";
+				}
 			}
 
-			if (isset($class->directive)) {
-				$pattern = $class->directive;
+			if ($class->directive() !== false) {
+				$pattern = $class->directive();
 			}
 
 			if (!isset($pattern)) return;
 
-			if (!isset($class->directive) && $class->extends == true && count($reflection->getParameters()) == 0) {
-				$pattern = "/\{\% $name \%\}/";
+			if (($class->directive() === false) && count($reflection->getParameters()) == 0) {
+				if ($e == 'blade') {
+					$pattern = "/\@$name/";
+				}
+				else {
+					$pattern = "/\{\% $name \%\}/";
+				}
 			}
 
 			if (count($reflection->getParameters()) > 0) {
-
-				$this->__cached = preg_replace_callback($pattern, function($match) use($subject, $object, $class) {
+				$this->__cached = preg_replace_callback($pattern, function($match) use($subject, $object, $class, $pattern) {
 					return $object->persist($match, $subject, $class);
 				}, $this->__cached);
-
-				return;
 			}
-
-			$this->__cached = preg_replace_callback($pattern, function($match) use($subject, $object, $class) {
-				return $object->persist(null, $subject, $object, $class, true);
-			}, $this->__cached);
+			else {
+				$this->__cached = preg_replace_callback($pattern, function($match) use($subject, $object, $class, $pattern) {
+					return $object->persist(null, $subject, $class, true);
+				}, $this->__cached);
+			}
 		}
 	}
 
@@ -172,13 +193,13 @@ class Directives
 	 */
 	private function mif()
 	{
-		$this->__cached = preg_replace('/\{\% if (.*?) \%\}/', '<?php if ($1) : ?>', $this->__cached);
-		$this->__cached = preg_replace('/\{\% isset (.*?) \%\}/', '<?php if (isset($1)) : ?>', $this->__cached);
-		$this->__cached = preg_replace('/\{\% empty (.*?) \%\}/', '<?php if (empty($1)) : ?>', $this->__cached);
-		$this->__cached = preg_replace('/\{\% null (.*?) \%\}/', '<?php if ($1 == null) : ?>', $this->__cached);
-		$this->__cached = preg_replace('/\{\% elseif (.*?) \%\}/', '<?php elseif ($1) : ?>', $this->__cached);
-		$this->__cached = preg_replace('/\{\% else \%\}/', '<?php else : ?>', $this->__cached);
-		$this->__cached = preg_replace('/\{\% endif \%\}/', '<?php endif ;?>', $this->__cached);
+		$this->__cached = preg_replace($this->usingDirective('if', true), '<?php if ($1) : ?>', $this->__cached);
+		$this->__cached = preg_replace($this->usingDirective('isset', true), '<?php if (isset($1)) : ?>', $this->__cached);
+		$this->__cached = preg_replace($this->usingDirective('empty', true), '<?php if (empty($1)) : ?>', $this->__cached);
+		$this->__cached = preg_replace($this->usingDirective('null', true), '<?php if ($1 == null) : ?>', $this->__cached);
+		$this->__cached = preg_replace($this->usingDirective('elseif', true), '<?php elseif ($1) : ?>', $this->__cached);
+		$this->__cached = preg_replace($this->usingDirective('else'), '<?php else : ?>', $this->__cached);
+		$this->__cached = preg_replace($this->usingDirective('endif'), '<?php endif ;?>', $this->__cached);
 	}
 
 	/**
@@ -188,8 +209,8 @@ class Directives
 	 */
 	private function mforeach()
 	{
-		$this->__cached = preg_replace('/\{\% foreach (.*?) \%\}/', '<?php foreach ($1) : ?>', $this->__cached);
-		$this->__cached = preg_replace('/\{\% endforeach \%\}/', '<?php endforeach ;?>', $this->__cached);
+		$this->__cached = preg_replace($this->usingDirective('foreach', true), '<?php foreach ($1) : ?>', $this->__cached);
+		$this->__cached = preg_replace($this->usingDirective('endforeach'), '<?php endforeach ;?>', $this->__cached);
 	}
 
 	/**
@@ -199,8 +220,8 @@ class Directives
 	 */
 	private function mfor()
 	{
-		$this->__cached = preg_replace('/\{\% for (.*?) \%\}/', '<?php for ($1) : ?>', $this->__cached);
-		$this->__cached = preg_replace('/\{\% endfor \%\}/', '<?php endfor ;?>', $this->__cached);
+		$this->__cached = preg_replace($this->usingDirective('for', true), '<?php for ($1) : ?>', $this->__cached);
+		$this->__cached = preg_replace($this->usingDirective('endfor'), '<?php endfor ;?>', $this->__cached);
 	}
 
 	/**
@@ -210,8 +231,8 @@ class Directives
 	 */
 	private function mswitch()
 	{
-		$this->__cached = preg_replace('/\{\% switch (.*?) \%\}/', '<?php switch ($1) : ?>', $this->__cached);
-		$this->__cached = preg_replace('/\{\% endswitch \%\}/', '<?php endswitch ;?>', $this->__cached);
+		$this->__cached = preg_replace($this->usingDirective('switch', true), '<?php switch ($1) : ?>', $this->__cached);
+		$this->__cached = preg_replace($this->usingDirective('endswitch'), '<?php endswitch ;?>', $this->__cached);
 	}
 
 	/**
@@ -221,8 +242,8 @@ class Directives
 	 */
 	private function mwhile()
 	{
-		$this->__cached = preg_replace('/\{\% while (.*?) \%\}/', '<?php while ($1) : ?>', $this->__cached);
-		$this->__cached = preg_replace('/\{\% endwhile \%\}/', '<?php endwhile ;?>', $this->__cached);
+		$this->__cached = preg_replace($this->usingDirective('while', true), '<?php while ($1) : ?>', $this->__cached);
+		$this->__cached = preg_replace($this->usingDirective('endwhile'), '<?php endwhile ;?>', $this->__cached);
 	}
 
 	/**
@@ -243,7 +264,14 @@ class Directives
 	 */
 	private function msection()
 	{
-		$this->__cached = preg_replace_callback('/\{\% in\((.*?)\) \%\}(.*?)\{\% endin \%\}/s', function($match) {
+		if ($this->__engine == 'blade') {
+			$pattern = '/\@section\((.*?)\)(.*?)\@endsection/s';
+		}
+		else {
+			$pattern = '/\{\% section\((.*?)\) \%\}(.*?)\{\% endsection \%\}/s';
+		}
+
+		$this->__cached = preg_replace_callback($pattern, function($match) {
 			$name = str_replace("'", "", $match[1]);
 			$name = str_replace('"', '', $name);
 
@@ -253,7 +281,7 @@ class Directives
 			array_push(static::$sections, $section);
 		}, $this->__cached);
 
-		$this->__cached = preg_replace_callback('/\{\% section\((.*?)\) \%\}/', function($match) {
+		$this->__cached = preg_replace_callback($this->usingDirective('yield', true, true), function($match) {
 			$name = str_replace("'", "", $match[1]);
 			$name = str_replace('"', '', $name);
 
@@ -286,7 +314,48 @@ class Directives
 	 */
 	private function mcomment()
 	{
-		$this->__cached = preg_replace('/\{\{\-\-(.*?)\-\-\}\}/s', '<?php /*$1*/ ?>', $this->__cached);
+		$this->__cached = preg_replace('/\{\-\-(.*?)\-\-\}/s', '<?php /*$1*/ ?>', $this->__cached);
+	}
+
+	/**
+	 * Return code based on specified engine
+	 *
+	 * @param  string  $pattern
+	 * @param  boolean $control
+	 */
+	private function usingDirective($pattern, $control = false, $capture = false)
+	{
+		if ($control) {
+			switch ($this->__engine) {
+				case 'blade':
+					return "/\@$pattern\((.*?)\)/";
+					break;
+
+				case 'modulus':
+					return $capture == true ? "/\{\% $pattern\((.*?)\) \%\}/" : "/\{\% $pattern (.*?) \%\}/";
+					break;
+
+				default:
+					return '';
+					break;
+			}
+
+			return;
+		}
+
+		switch ($this->__engine) {
+			case 'blade':
+				return "/\@$pattern/";
+				break;
+
+			case 'modulus':
+				return "/\{\% $pattern \%\}/";
+				break;
+
+			default:
+				return '';
+				break;
+		}
 	}
 
 	/**
@@ -298,27 +367,37 @@ class Directives
 	 */
 	private function persist($match, $subject, $directive, $isstring = false)
 	{
-		if ($isstring) {
-			return (new $subject)->message();
+		$match = isset($match[1]) ? $match[1] : null;
+		$uses = $directive->uses() !== false ? $directive->uses() : null;
+
+		$e = $this->__engine;
+
+		if ($directive->extends() === true && $directive->name() !== false && $this->_control($uses)) {
+			return "<?php $uses ((new $subject)->message($match)) : ?>";
 		}
-
-		$uses = isset($directive->uses) ? $directive->uses . ' ' : '';
-
-		if ($match != null) {
-			if (isset($directive->extends) && $directive->extends == true) {
-				return $uses . "(new $subject)->message($match[1])";
-			}
-
-			return "<?php echo (new $subject)->message($match[1]) ;?>";
+		else if ($directive->extends() === true && $directive->name() !== false && $this->_control($uses) === false) {
+			return "<?php $uses((new $subject)->message($match)); ?>";
 		}
-
-		if (isset($directive->extends) && $directive->extends == true) {
-			return $uses . "(new $subject)->message()";
+		else if ($directive->name() !== true && $uses === null) {
+			return $directive->message($match);
 		}
-
-		return "<?php echo (new $subject)->message() ;?>";
 	}
 
+	private function _control($uses)
+	{
+		if (in_array($uses, ['if', 'isset', 'empty', 'null', 'elseif', 'foreach', 'for', 'switch', 'while'])) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Clean url
+	 *
+	 * @param  string $path
+	 * @return string $path
+	 */
 	private function cleanPath($path)
 	{
 		$path = str_replace('/', $this->DS, $path);
