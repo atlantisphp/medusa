@@ -7,13 +7,6 @@ use AtlantisPHP\Medusa\Directive;
 class Not extends Directive
 {
 	/**
-	 * Override directive
-	 *
-	 * @var $directive
-	 */
-	protected $directive = '/not\((.*?)\)/';
-
-	/**
 	 * Directive extends
 	 *
 	 * @var $extends

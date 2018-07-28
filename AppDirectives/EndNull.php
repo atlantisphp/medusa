@@ -7,13 +7,6 @@ use AtlantisPHP\Medusa\Directive;
 class EndNull extends Directive
 {
 	/**
-	 * Directive extends
-	 *
-	 * @var $extends
-	 */
-  protected $extends = true;
-
-	/**
 	 * Directive name
 	 *
 	 * @var $name
