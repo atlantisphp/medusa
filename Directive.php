@@ -45,6 +45,4 @@ class Directive
 
     return false;
   }
-
-
 }

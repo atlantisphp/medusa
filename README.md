@@ -17,8 +17,8 @@ use AtlantisPHP\Medusa\Template as Medusa;
 
 $medusa = new Medusa();
 
-$medusa->setCacheDirectory('/../storage/cache');
-$medusa->setViewsDirectory('/../views');
+$medusa->setCacheDirectory(__DIR__ . '/../storage/cache');
+$medusa->setViewsDirectory(__DIR__ .'/../views');
 $medusa->setViewsExtension('.medusa.php');
 
 $medusa->view('home', ['name' => 'Donald', 'app' => 'Medusa Application']);

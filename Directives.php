@@ -117,8 +117,8 @@ class Directives
 			$view = str_replace("'", "", $match[1]);
 			$view = str_replace('"', '', $view);
 
-			$path = $this->cleanPath($dir . $this->DS .$view . $ext);
-			$view = $this->cleanPath($view);
+			$path = $dir . $this->DS .$view . $ext;
+			$view = $view;
 
 			if (file_exists($path)) {
 				return '<!--%' .base64_encode($view). '%-->' . PHP_EOL . file_get_contents($path);
@@ -383,6 +383,12 @@ class Directives
 		}
 	}
 
+	/**
+	 * Checks if directive uses control structure
+	 *
+	 * @param string $uses
+	 * @return bool
+	 */
 	private function _control($uses)
 	{
 		if (in_array($uses, ['if', 'isset', 'empty', 'null', 'elseif', 'foreach', 'for', 'switch', 'while'])) {
