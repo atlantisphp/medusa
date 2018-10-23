@@ -15,8 +15,5 @@
       "AtlantisPHP\\Medusa\\": ""
     }
   },
-  "minimum-stability":"stable",
-  "require": {
-    "erusev/parsedown": "^1.7"
-  }
+  "minimum-stability":"stable"
 }
