@@ -12,7 +12,7 @@
   ],
   "autoload": {
     "psr-4": {
-      "AtlantisPHP\\Medusa\\": ""
+      "AtlantisPHP\\Medusa\\": "src/"
     }
   },
   "minimum-stability":"stable"
