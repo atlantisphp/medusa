@@ -1,7 +1,7 @@
 {
   "name": "atlantisphp/medusa",
   "description": "Easy to use PHP templating engine",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "license": "MIT",
   "type": "package",
   "authors": [
@@ -12,7 +12,7 @@
   ],
   "autoload": {
     "psr-4": {
-      "AtlantisPHP\\Medusa\\": ""
+      "AtlantisPHP\\Medusa\\": "src/"
     }
   },
   "minimum-stability":"stable"

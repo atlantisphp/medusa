@@ -254,7 +254,7 @@ class Directives
 	private function mecho()
 	{
 		$this->__cached = preg_replace('/\{\{(.*?)\}\}/', '<?php echo htmlspecialchars($1, ENT_QUOTES); ?>', $this->__cached);
-		$this->__cached = preg_replace('/\{\!\!(.*?)\!\!\}/', '<?php echo $1; ?>', $this->__cached);
+		$this->__cached = preg_replace('/\{\!\!(.*?)\!\!\}/s', '<?php echo $1; ?>', $this->__cached);
 	}
 
 	/**
